@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>User information-page</title>
@@ -67,10 +68,10 @@
 <body>
 <nav class="navbar navbar-dark bg-dark px-3">
     <div class="d-flex justify-content-between w-100 align-items-center">
+        <!-- Информация о текущем пользователе через Spring Security -->
         <span class="navbar-text text-white">
-            <span th:text="${user.email}"></span>
-            <span> with roles: </span>
-            <span th:text="${#strings.listJoin(user.roles, ' ')}"></span>
+            <span sec:authentication="name"></span> with roles:
+            <span sec:authentication="principal.authorities"></span>
         </span>
         <form th:action="@{/logout}" method="post" class="mb-0">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -83,6 +84,8 @@
     <div class="sidebar">
         <nav class="nav flex-column nav-pills">
             <a class="nav-link active" href="/user">User</a>
+            <!-- Ссылка на Admin видна только для администраторов -->
+            <a class="nav-link" href="/admin" sec:authorize="hasRole('ROLE_ADMIN')">Admin</a>
         </nav>
     </div>
 
@@ -107,14 +110,15 @@
                     </thead>
                     <tbody>
                     <tr>
-                        <td th:text="${user.id}"></td>
-                        <td th:text="${user.firstName}"></td>
-                        <td th:text="${user.lastName}"></td>
-                        <td th:text="${user.age}"></td>
-                        <td th:text="${user.email}"></td>
+                        <!-- Получение данных напрямую из SecurityContext -->
+                        <td sec:authentication="principal.id">ID</td>
+                        <td sec:authentication="principal.firstName">FirstName</td>
+                        <td sec:authentication="principal.lastName">LastName</td>
+                        <td sec:authentication="principal.age">Age</td>
+                        <td sec:authentication="principal.email">Email</td>
                         <td>
-                                    <span th:each="role : ${user.roles}" class="role-badge me-1"
-                                          th:text="${role.name.replace('ROLE_','')}"></span>
+                            <span th:each="role : ${#authentication.principal.roles}" class="role-badge me-1"
+                                  th:text="${role.name.replace('ROLE_','')}"></span>
                         </td>
                     </tr>
                     </tbody>

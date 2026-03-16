@@ -15,7 +15,7 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>11</java.version>
-		<thymeleaf-extras-springsecurity5.version>3.1.2.RELEASE</thymeleaf-extras-springsecurity5.version>
+		<thymeleaf-extras-springsecurity5.version>3.0.5.RELEASE</thymeleaf-extras-springsecurity5.version>
 	</properties>
 	<dependencies>
 		<!-- Web -->

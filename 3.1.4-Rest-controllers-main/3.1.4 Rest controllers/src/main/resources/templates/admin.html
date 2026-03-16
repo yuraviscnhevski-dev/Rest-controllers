@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <title>Admin panel</title>
@@ -17,8 +18,10 @@
 
 <nav class="navbar navbar-dark bg-dark px-3">
   <div class="d-flex justify-content-between w-100 align-items-center">
-        <span class="navbar-text text-white" th:with="roles=${#strings.listJoin(currentUser.roles, ' ')}">
-            <span th:text="${currentUser.email}"></span> with roles: <span th:text="${roles}"></span>
+    <!-- Информация о текущем пользователе через Spring Security -->
+    <span class="navbar-text text-white">
+            <span sec:authentication="name"></span> with roles:
+            <span sec:authentication="principal.authorities"></span>
         </span>
     <form th:action="@{/logout}" method="post" class="mb-0">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

@@ -5,132 +5,20 @@
   <title>Admin panel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f8f9fa;
-    }
-    .sidebar {
-      min-width: 200px;
-      max-width: 200px;
-      background-color: #fff;
-      border-right: 1px solid #dee2e6;
-      padding-top: 20px;
-    }
-    .sidebar .nav-link {
-      border-radius: 0;
-    }
-    .sidebar .nav-link.active {
-      background-color: #0d6efd;
-      color: #fff;
-    }
-    .sidebar .nav-link:not(.active) {
-      color: #000;
-    }
-    .sidebar .nav-link:not(.active):hover {
-      color: #0d6efd;
-    }
-    .content-wrapper {
-      padding: 25px 30px;
-    }
-    .page-title {
-      font-size: 32px;
-      font-weight: 400;
-      margin-bottom: 20px;
-      color: #343a40;
-    }
-    .card-header-tabs {
-      margin-bottom: -1px;
-    }
-
-    /* Стили для модальных окон (общие для удаления и редактирования) */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1050;
-    }
-    .delete-modal {
-      background-color: #fff;
-      border-radius: 4px;
-      width: 500px;
-      max-width: 90%;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .delete-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 20px;
-      border-bottom: 1px solid #dee2e6;
-    }
-    .delete-modal-header h5 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 500;
-      color: #333;
-    }
-    .btn-close-custom {
-      background: none;
-      border: none;
-      font-size: 28px;
-      line-height: 1;
-      color: #666;
-      cursor: pointer;
-      padding: 0;
-      text-decoration: none;
-    }
-    .btn-close-custom:hover {
-      color: #333;
-    }
-    .delete-modal-body {
-      padding: 20px;
-    }
-    .form-group-center {
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    .form-label-bold {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: #333;
-    }
-    .form-input-narrow {
-      width: 250px;
-      margin: 0 auto;
-      text-align: left;
-    }
-    .delete-modal-footer {
-      padding: 15px 20px;
-      border-top: 1px solid #dee2e6;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    /* Для полей на всю ширину внутри модалки (альтернатива) */
-    .modal-field {
-      margin-bottom: 15px;
-    }
-    .modal-field label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 5px;
-    }
+    body { background-color: #f8f9fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .sidebar { min-width: 200px; max-width: 200px; background-color: #fff; border-right: 1px solid #dee2e6; padding-top: 20px; }
+    .sidebar .nav-link { border-radius: 0; }
+    .sidebar .nav-link.active { background-color: #0d6efd; color: #fff; }
+    .content-wrapper { padding: 25px 30px; }
+    .page-title { font-size: 32px; font-weight: 400; margin-bottom: 20px; color: #343a40; }
   </style>
 </head>
 <body>
+
 <nav class="navbar navbar-dark bg-dark px-3">
   <div class="d-flex justify-content-between w-100 align-items-center">
-        <span class="navbar-text text-white">
-            <span th:text="${currentUser.email}">admin@mail.ru</span>
-            <span> with roles: </span>
-            <span th:text="${#strings.listJoin(currentUser.roles.![#strings.replace(name,'ROLE_','')], ' ')}">ADMIN USER</span>
+        <span class="navbar-text text-white" th:with="roles=${#strings.listJoin(currentUser.roles, ' ')}">
+            <span th:text="${currentUser.email}"></span> with roles: <span th:text="${roles}"></span>
         </span>
     <form th:action="@{/logout}" method="post" class="mb-0">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -142,7 +30,7 @@
 <div class="d-flex">
   <div class="sidebar">
     <nav class="nav flex-column nav-pills">
-      <a class="nav-link active" aria-current="page" href="/admin">Admin</a>
+      <a class="nav-link active" href="/admin">Admin</a>
       <a class="nav-link" href="/user">User</a>
     </nav>
   </div>
@@ -154,49 +42,31 @@
       <div class="card-header pb-0">
         <ul class="nav nav-tabs card-header-tabs">
           <li class="nav-item">
-            <a class="nav-link active" href="/admin">Users table</a>
+            <a class="nav-link active" href="#">Users table</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/admin/new">New User</a>
+            <button class="nav-link" style="border: none; background: none; color: #0d6efd;" onclick="openAddModal()">New User</button>
           </li>
         </ul>
       </div>
       <div class="card-body pt-3">
         <h5 class="card-title mb-3">All users</h5>
         <div class="table-responsive">
-          <table class="table table-striped table-hover align-middle mb-0">
+          <table class="table table-striped table-hover align-middle mb-0" id="users-table">
             <thead class="table-light">
             <tr>
-              <th scope="col">ID</th>
-              <th scope="col">First Name</th>
-              <th scope="col">Last Name</th>
-              <th scope="col">Age</th>
-              <th scope="col">Email</th>
-              <th scope="col">Role</th>
-              <th scope="col">Edit</th>
-              <th scope="col">Delete</th>
+              <th>ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Age</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Edit</th>
+              <th>Delete</th>
             </tr>
             </thead>
-            <tbody>
-            <tr th:each="user : ${users}">
-              <td th:text="${user.id}">2</td>
-              <td th:text="${user.firstName}">admin</td>
-              <td th:text="${user.lastName}">admin</td>
-              <td th:text="${user.age}">35</td>
-              <td th:text="${user.email}">admin@mail.ru</td>
-              <td>
-                                <span th:if="${user.roles != null}" th:each="role, iterStat : ${user.roles}">
-                                    <span th:text="${#strings.replace(role.name, 'ROLE_', '')}">ADMIN</span>
-                                    <span th:if="${!iterStat.last}"> </span>
-                                </span>
-              </td>
-              <td>
-                <a th:href="@{/admin/edit/{id}(id=${user.id})}" class="btn btn-info btn-sm text-white">Edit</a>
-              </td>
-              <td>
-                <a th:href="@{/admin/delete/{id}(id=${user.id})}" class="btn btn-danger btn-sm">Delete</a>
-              </td>
-            </tr>
+            <tbody id="users-table-body">
+            <!-- данные подставятся через JS -->
             </tbody>
           </table>
         </div>
@@ -205,119 +75,290 @@
   </div>
 </div>
 
-<!-- Модальное окно удаления (остаётся без изменений) -->
-<div th:if="${showDeleteModal}" class="modal-overlay">
-  <div class="delete-modal">
-    <div class="delete-modal-header">
-      <h5>Delete user</h5>
-      <a th:href="@{/admin}" class="btn-close-custom">&times;</a>
-    </div>
-    <div class="delete-modal-body">
-      <div class="form-group-center">
-        <label class="form-label-bold">ID</label>
-        <input type="text" class="form-control form-input-narrow" th:value="${userToDelete.id}" disabled>
+<!-- Модальное окно добавления пользователя -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add new user</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="form-group-center">
-        <label class="form-label-bold">First name</label>
-        <input type="text" class="form-control form-input-narrow" th:value="${userToDelete.firstName}" disabled>
+      <div class="modal-body">
+        <form id="addUserForm">
+          <div class="mb-3">
+            <label class="form-label">First name</label>
+            <input type="text" class="form-control" name="firstName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Last name</label>
+            <input type="text" class="form-control" name="lastName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Age</label>
+            <input type="number" class="form-control" name="age" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Roles</label>
+            <select multiple class="form-select" name="roles" id="addRolesSelect"></select>
+          </div>
+        </form>
       </div>
-      <div class="form-group-center">
-        <label class="form-label-bold">Last name</label>
-        <input type="text" class="form-control form-input-narrow" th:value="${userToDelete.lastName}" disabled>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveUser()">Add</button>
       </div>
-      <div class="form-group-center">
-        <label class="form-label-bold">Age</label>
-        <input type="text" class="form-control form-input-narrow" th:value="${userToDelete.age}" disabled>
-      </div>
-      <div class="form-group-center">
-        <label class="form-label-bold">Email</label>
-        <input type="text" class="form-control form-input-narrow" th:value="${userToDelete.email}" disabled>
-      </div>
-      <div class="form-group-center">
-        <label class="form-label-bold">Role</label>
-        <select class="form-select form-input-narrow" multiple disabled size="2">
-          <option th:each="role : ${userToDelete.roles}"
-                  th:value="${role.name}"
-                  th:text="${#strings.replace(role.name, 'ROLE_', '')}"
-                  selected>ADMIN</option>
-        </select>
-      </div>
-    </div>
-    <div class="delete-modal-footer">
-      <a th:href="@{/admin}" class="btn btn-secondary">Close</a>
-      <form th:action="@{/admin/delete/{id}(id=${userToDelete.id})}" method="post" style="display:inline;">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <button type="submit" class="btn btn-danger">Delete</button>
-      </form>
     </div>
   </div>
 </div>
 
-<!-- Модальное окно редактирования (новое) -->
-<div th:if="${showEditModal}" class="modal-overlay">
-  <div class="delete-modal" style="width: 550px;"> <!-- чуть шире для удобства -->
-    <div class="delete-modal-header">
-      <h5>Edit user</h5>
-      <a th:href="@{/admin}" class="btn-close-custom">&times;</a>
-    </div>
-    <div class="delete-modal-body">
-      <form th:action="@{/admin/edit/{id}(id=${editUser.id})}" th:object="${editUser}" method="post">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <input type="hidden" th:field="*{id}" />
-
-        <!-- Поля формы (можно оставить центрированными или сделать на всю ширину) -->
-        <div class="form-group-center">
-          <label class="form-label-bold">ID</label>
-          <input type="text" class="form-control form-input-narrow" th:value="${editUser.id}" disabled>
-        </div>
-
-        <div class="form-group-center">
-          <label class="form-label-bold">First name</label>
-          <input type="text" th:field="*{firstName}" class="form-control form-input-narrow" required>
-        </div>
-
-        <div class="form-group-center">
-          <label class="form-label-bold">Last name</label>
-          <input type="text" th:field="*{lastName}" class="form-control form-input-narrow" required>
-        </div>
-
-        <div class="form-group-center">
-          <label class="form-label-bold">Age</label>
-          <input type="number" th:field="*{age}" class="form-control form-input-narrow" required>
-        </div>
-
-        <div class="form-group-center">
-          <label class="form-label-bold">Email</label>
-          <input type="email" th:field="*{email}" class="form-control form-input-narrow" required>
-        </div>
-
-        <div class="form-group-center">
-          <label class="form-label-bold">Password</label>
-          <input type="password" th:field="*{password}" class="form-control form-input-narrow"
-                 placeholder="Leave blank to keep current">
-        </div>
-
-        <div class="form-group-center">
-          <label class="form-label-bold">Role</label>
-          <select th:field="*{roles}" multiple class="form-select form-input-narrow">
-            <option th:each="role : ${allRoles}"
-                    th:value="${role.id}"
-                    th:text="${#strings.replace(role.name, 'ROLE_', '')}"
-                    th:selected="${editUser.roles.contains(role)}">
-            </option>
-          </select>
-        </div>
-
-        <div class="delete-modal-footer">
-          <a th:href="@{/admin}" class="btn btn-secondary">Close</a>
-          <button type="submit" class="btn btn-primary">Edit</button>
-        </div>
-      </form>
+<!-- Модальное окно редактирования пользователя -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit user</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editUserForm">
+          <input type="hidden" name="id" id="editId">
+          <div class="mb-3">
+            <label class="form-label">First name</label>
+            <input type="text" class="form-control" name="firstName" id="editFirstName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Last name</label>
+            <input type="text" class="form-control" name="lastName" id="editLastName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Age</label>
+            <input type="number" class="form-control" name="age" id="editAge" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" id="editEmail" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password (leave blank to keep current)</label>
+            <input type="password" class="form-control" name="password" id="editPassword">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Roles</label>
+            <select multiple class="form-select" name="roles" id="editRolesSelect"></select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="updateUser()">Save changes</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Bootstrap JS для интерактивных компонентов (не обязателен, но может пригодиться) -->
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete user <span id="deleteUserName"></span>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS и наш скрипт -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Глобальные переменные
+  let currentUserIdForDelete = null;
+  let currentUserIdForEdit = null;
+  let allRoles = [];
+
+  // CSRF токен из cookie
+  function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'XSRF-TOKEN') {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  const csrfToken = getCsrfToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-XSRF-TOKEN': csrfToken
+  };
+
+  // Загрузка всех пользователей
+  async function loadUsers() {
+    const response = await fetch('/api/admin/users');
+    const users = await response.json();
+    const tbody = document.getElementById('users-table-body');
+    tbody.innerHTML = '';
+    users.forEach(user => {
+      const rolesStr = user.roles.map(r => r.name.replace('ROLE_', '')).join(' ');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+                <td>${user.id}</td>
+                <td>${user.firstName}</td>
+                <td>${user.lastName}</td>
+                <td>${user.age}</td>
+                <td>${user.email}</td>
+                <td>${rolesStr}</td>
+                <td><button class="btn btn-info btn-sm" onclick="openEditModal(${user.id})">Edit</button></td>
+                <td><button class="btn btn-danger btn-sm" onclick="openDeleteModal(${user.id}, '${user.firstName} ${user.lastName}')">Delete</button></td>
+            `;
+      tbody.appendChild(row);
+    });
+  }
+
+  // Загрузка всех ролей (для селектов)
+  async function loadRoles() {
+    const response = await fetch('/api/admin/roles');
+    allRoles = await response.json();
+  }
+
+  // Заполнить селект ролями (общий для добавления и редактирования)
+  function populateRolesSelect(selectId, selectedRoleIds = []) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '';
+    allRoles.forEach(role => {
+      const option = document.createElement('option');
+      option.value = role.id;
+      option.textContent = role.name.replace('ROLE_', '');
+      if (selectedRoleIds.includes(role.id)) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+  }
+
+  // Открыть модальное окно добавления
+  async function openAddModal() {
+    await loadRoles(); // убедимся, что роли загружены
+    populateRolesSelect('addRolesSelect');
+    document.getElementById('addUserForm').reset();
+    new bootstrap.Modal(document.getElementById('addUserModal')).show();
+  }
+
+  // Сохранить нового пользователя
+  async function saveUser() {
+    const form = document.getElementById('addUserForm');
+    const formData = new FormData(form);
+    const user = {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      age: parseInt(formData.get('age')),
+      email: formData.get('email'),
+      password: formData.get('password')
+    };
+    const roleIds = Array.from(formData.getAll('roles')).map(id => parseInt(id));
+    const url = `/api/admin/users?roles=${roleIds.join(',')}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(user)
+    });
+    if (response.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+      await loadUsers();
+    } else {
+      alert('Error adding user');
+    }
+  }
+
+  // Открыть модальное окно редактирования
+  async function openEditModal(id) {
+    await loadRoles();
+    const response = await fetch(`/api/admin/users/${id}`);
+    const user = await response.json();
+    currentUserIdForEdit = id;
+    document.getElementById('editId').value = user.id;
+    document.getElementById('editFirstName').value = user.firstName;
+    document.getElementById('editLastName').value = user.lastName;
+    document.getElementById('editAge').value = user.age;
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editPassword').value = ''; // очищаем пароль
+    const selectedRoleIds = user.roles.map(r => r.id);
+    populateRolesSelect('editRolesSelect', selectedRoleIds);
+    new bootstrap.Modal(document.getElementById('editUserModal')).show();
+  }
+
+  // Обновить пользователя
+  async function updateUser() {
+    const form = document.getElementById('editUserForm');
+    const formData = new FormData(form);
+    const user = {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      age: parseInt(formData.get('age')),
+      email: formData.get('email')
+    };
+    const password = formData.get('password');
+    if (password) {
+      user.password = password;
+    }
+    const roleIds = Array.from(formData.getAll('roles')).map(id => parseInt(id));
+    const url = `/api/admin/users/${currentUserIdForEdit}?roles=${roleIds.join(',')}`;
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify(user)
+    });
+    if (response.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+      await loadUsers();
+    } else {
+      alert('Error updating user');
+    }
+  }
+
+  // Открыть модальное окно удаления
+  function openDeleteModal(id, fullName) {
+    currentUserIdForDelete = id;
+    document.getElementById('deleteUserName').textContent = fullName;
+    new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+  }
+
+  // Удалить пользователя
+  async function deleteUser() {
+    const response = await fetch(`/api/admin/users/${currentUserIdForDelete}`, {
+      method: 'DELETE',
+      headers: headers
+    });
+    if (response.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
+      await loadUsers();
+    } else {
+      alert('Error deleting user');
+    }
+  }
+
+  // Инициализация при загрузке страницы
+  window.onload = async function() {
+    await loadUsers();
+    await loadRoles(); // можно заранее загрузить роли
+  };
+</script>
 </body>
 </html>
